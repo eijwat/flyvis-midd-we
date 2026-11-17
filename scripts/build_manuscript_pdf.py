@@ -132,6 +132,8 @@ def figure_block(key, title, body, start_page=True):
     path = FIGURES[key].as_posix()
     # Reserve more room for the longest formal legends.
     height = "0.58" if key == "S4" else "0.72" if key.startswith("S") else "0.60"
+    if "_V" in FIGURES[key].stem:
+        height = "0.76"  # revised figures are taller and need the page
     return (
         ("\n\\clearpage\n\n" if start_page else "\n")
         + f"### {title}\n\n"
@@ -223,6 +225,166 @@ def supplementary_tables_markdown(root):
     return ''.join(output)+'\n\\endgroup\n'
 
 
+PLAIN_S1 = [
+    ("Reference patterns and luminance series", "1, 3", "50 pretrained", "single eye",
+     "three reference patterns; 15 luminances"),
+    ("Static controls", "3E–F, S5", "50 pretrained", "single eye",
+     "ten shuffles per pattern; balanced, random-pixel and uniform images"),
+    ("Training", "2, S8", "14 trained from scratch", "single eye",
+     "every 1,000 steps to step 100,000"),
+    ("Summation rule", "4, S7", "000–009", "eight fields",
+     "seven luminances, 21 pairs"),
+    ("Comparison of renderings", "S2", "000–009", "seven fields, two resolutions",
+     "seven luminances, 21 pairs"),
+    ("Phase", "5A–B, S5E–F", "50 pretrained (C = 48); 000–009 (other patterns)", "single eye",
+     "12 phases over one 15° period"),
+    ("Placement and radial sampling", "5C–E", "000–009", "single eye",
+     "shifts of 3 pixels; seven radial bins"),
+    ("Number of sectors", "S6", "008, 009, 005, 000–004, 006, 007", "single eye",
+     "seven sector counts, two phases"),
+    ("Task error", "S5G–H", "50 pretrained", "single eye", "15 Sintel samples"),
+    ("T4c tuning", "5F", "50 pretrained", "single eye", "3MIDD C = 48, phase average"),
+    ("Replacement at the decoder input", "6B–C, S9A, E, F", "000–009", "single eye",
+     "replacement by activity for a uniform gray field"),
+    ("Replacement by mean activity", "S9C", "000–009", "native and high resolution",
+     "mean over 21 three-level conditions"),
+    ("Activity of T4 subtypes", "S9B, G", "000–009", "eight fields", "seven luminances"),
+    ("Silencing in the recurrent network", "S9D, H", "six trained from scratch, step 250,000",
+     "single eye", "12 phases; 199 random sets"),
+    ("Exchange of decoders", "6D–E, S10", "000, 005, …, 045", "single eye",
+     "10 × 10 network–decoder pairs"),
+    ("Prolonged presentation", "S3", "024, 041, 042", "single eye", "500 frames"),
+    ("Propeller", "1B, S1", "50 pretrained; 000–009 for eight fields", "single eye; eight fields",
+     "stationary, clockwise, counterclockwise"),
+    ("Detector array", "S4", "000", "single eye", "21 × 21 grid of 4MIDD luminances"),
+]
+
+
+def supplementary_tables_plain(root):
+    """Supplementary tables with reader-facing headings, built from the same stored files."""
+    import csv
+
+    def read(path):
+        if not path.is_file():
+            raise ValueError('Missing supplementary table: ' + str(path))
+        with path.open(newline='') as stream:
+            return list(csv.DictReader(stream))
+
+    def tab(columns, rows):
+        def cell(value):
+            return str(value).replace('|', '/').replace('\n', ' ')
+        return ('| ' + ' | '.join(columns) + ' |\n| ' + ' | '.join(['---'] * len(columns)) + ' |\n'
+                + ''.join('| ' + ' | '.join(cell(v) for v in row) + ' |\n' for row in rows) + '\n')
+
+    tables = root / 'figures/supplementary/tables'
+    pre = root / 'data/precomputed'
+    out = ['\n\\clearpage\n\n## Supplementary tables\n\n\\begingroup\n\\small\n\n']
+
+    out.append('### Table S1. Networks and conditions of each analysis\n\n'
+               'Flow is clockwise-positive except for the stored eight-field scalars, which are '
+               'counterclockwise-positive. All measures use frames 10–49 of a 50-frame movie.\n\n'
+               + tab(['Analysis', 'Figures', 'Networks', 'Rendering', 'Conditions'], PLAIN_S1))
+
+    estimates = read(tables / 'TableS2_model_unit_estimates.csv')
+    sources = sorted({r['source_file'] for r in estimates})
+    out.append('\n\\clearpage\n\n### Table S2. Files holding the network-level estimates\n\n'
+               'Estimates for individual networks, with intervals, are collected in '
+               '`figures/supplementary/tables/TableS2_model_unit_estimates.csv`. The table lists '
+               'the files from which they were taken and the number of entries from each.\n\n'
+               + tab(['Source file', 'Entries'],
+                     [(Path(v).name, sum(r['source_file'] == v for r in estimates)) for v in sources]))
+
+    names = {'3MIDD_048': 'A, 3MIDD C = 48', 'motion_grating': 'Drifting grating'}
+    effects = {'network': 'network', 'decoder': 'decoder', 'residual': 'interaction'}
+    rows = []
+    for r in read(tables / 'TableS3_crossswap_SS.csv'):
+        if r['window'] != 'stable' or (r['group'], r['metric']) not in (
+                ('3MIDD_048', 'A'), ('motion_grating', 'Q_motion')):
+            continue
+        interval = (f"{100 * float(r['ci_low']):.0f}–{100 * float(r['ci_high']):.0f}"
+                    if r.get('ci_low') and r.get('ci_high') else '')
+        rows.append((names[r['group']], effects[r['effect']], f"{100 * float(r['fraction']):.0f}",
+                     interval))
+    out.append('\n\\clearpage\n\n### Table S3. Exchange of decoders: sources of variation\n\n'
+               'Share of the variation over the 10 × 10 table of network–decoder pairs (frames '
+               '10–49). Each pair is measured once, so interaction includes measurement error. '
+               'All windows and measures are in `figures/supplementary/tables/TableS3_crossswap_SS.csv`.\n\n'
+               + tab(['Response', 'Source', 'Share (%)', '95% interval (%)'], rows))
+
+    inventory = read(tables / 'TableS4_reproduction_inventory.csv')
+    out.append('\n\\clearpage\n\n### Table S4. Files needed to reproduce the figures\n\n'
+               'Paths, SHA-256 checksums and the script that produces each figure are listed in '
+               '`figures/supplementary/tables/TableS4_reproduction_inventory.csv` ('
+               + str(len(inventory)) + ' entries).\n')
+
+    bio = pre / 'supplementary/biological_constraints/tables'
+    endpoint = {'Phase-mean signed A': 'A averaged over phases',
+                'Normalized phase SD': 'SD of A across phases / flow magnitude',
+                'Any phase-wise sign change': 'Fraction of networks changing sign across phases'}
+    rows = [(endpoint.get(r['Endpoint'], r['Endpoint']), r['Cluster 0 (n=31)'], r['Cluster 1 (n=7)'],
+             r['Cluster 2 (n=12)'], r['Effect / p (raw / Holm)'])
+            for r in read(bio / 'TableS5A_t4c_phenotype.csv')]
+    out.append('\n\\clearpage\n\n### Table S5A. Response to 3MIDD C = 48 by T4c tuning\n\n'
+               'Fifty pretrained networks. Entries are means or proportions with 95% bootstrap '
+               'intervals; p values are from permutation tests, unadjusted and Holm-adjusted.\n\n'
+               + tab(['Measure', 'Upward (n = 31)', 'Downward (n = 7)', 'Untuned (n = 12)',
+                      'Effect size; p (raw / Holm)'], rows))
+
+    label = {'B1 P1 mean A_activity': 'T4/T5 activity: mean mirror-reversing component',
+             'B1 P2 association with A_flow': 'T4/T5 activity: correlation with decoded A',
+             'B1 P3 sign agreement': 'T4/T5 activity: same sign as decoded A',
+             'D1 P1 mean I_ONOFF': 'ON minus OFF current: mean mirror-reversing component',
+             'D1 P2 association with A_flow': 'ON minus OFF current: correlation with decoded A',
+             'D1 P3 sign agreement': 'ON minus OFF current: same sign as decoded A',
+             'D1 secondary OFF_A association with A_flow': 'OFF current: correlation with decoded A'}
+    rows = [(label.get(r['Analysis / endpoint'], r['Analysis / endpoint']), r['Estimate/statistic'],
+             r['95% CI'], r['Raw p'], r['Adjusted p'],
+             'secondary' if r['Status'].lower().startswith('secondary') else 'primary')
+            for r in read(bio / 'TableS5B_activity_and_current.csv')]
+    out.append('\n\\clearpage\n\n### Table S5B. T4/T5 activity and ON/OFF currents\n\n'
+               'Fifty pretrained networks, 3MIDD C = 48, twelve phases averaged within network. '
+               'p values are Holm-adjusted within the primary or the secondary family of tests.\n\n'
+               + tab(['Measure', 'Estimate', '95% interval', 'p', 'Adjusted p', 'Family'], rows))
+
+    phase = read(pre / 'fig04/official50_phase_reliability.csv')[0]
+    lolo = next(r for r in read(pre / 'fig03/composition_bootstrap_summary.csv')
+                if r['source'] == 'LOLO' and r['metric'] == 'cv_r2')
+    directions = read(pre / 'fig06/crossswap_direction_accuracy.csv')
+    own = [r for r in directions if r['matched'].lower() == 'true']
+    other = [r for r in directions if r['matched'].lower() != 'true']
+    count = lambda rs: sum(r['both_correct'].lower() == 'true' for r in rs)
+    rows = [
+        ('ICC(A,1) of A across phases', 'Fig. 5B',
+         f"{float(phase['icc_absolute']):.3f} (95% interval {float(phase['ci_low']):.3f}–{float(phase['ci_high']):.3f})",
+         'fig04/official50_phase_reliability.csv'),
+        ('Networks changing sign across phases', 'Fig. 5A',
+         f"{int(phase['sign_changing_models'])}/{int(phase['n_models'])}",
+         'fig04/official50_phase_reliability.csv'),
+        ('Held-out R² of the summation rule', 'Fig. 4D',
+         f"{float(lolo['mean']):.3f} (95% interval {float(lolo['ci_low']):.3f}–{float(lolo['ci_high']):.3f})",
+         'fig03/composition_bootstrap_summary.csv'),
+        ('Both grating directions decoded: own / other decoders', 'Fig. 6E',
+         f"{count(own)}/{len(own)}; {count(other)}/{len(other)}",
+         'fig06/crossswap_direction_accuracy.csv'),
+    ]
+    pattern = {'3MIDD_048': '3MIDD C = 48', '3MIDD_207': '3MIDD C = 207', '4MIDD_085_170': '4MIDD 85/170'}
+    for r in read(pre / 'fig05/learning_stability_sign_tendency_100k.csv'):
+        p_raw = float(r['two_sided_binomial_p'])
+        rows.append((f"Sign of A after training, {pattern[r['group']]}", 'Fig. 2D',
+                     f"{int(r['reported_sign_count'])}/{int(r['n_seeds'])} {r['reported_direction']}; "
+                     f"p = {p_raw:.3g} (Bonferroni {min(1.0, 3 * p_raw):.3g})",
+                     'fig05/learning_stability_sign_tendency_100k.csv'))
+    out.append('\n\\clearpage\n\n### Table S6. Selected results and the files that hold them\n\n'
+               'Binomial tests are two-sided and exact; the Bonferroni adjustment is across the '
+               'three patterns. The values are read from these files under `data/precomputed/`:\n\n'
+               + ''.join(f'- `{name}`\n' for name in dict.fromkeys(row[3] for row in rows)) + '\n'
+               + tab(['Result', 'Figure', 'Value'], [row[:3] for row in rows]))
+    return ''.join(out) + '\n\\endgroup\n'
+
+
+PLAIN_TABLES = False
+
+
 def prepare_markdown(source, root):
     for key, path in FIGURES.items():
         if not (root / path).is_file():
@@ -239,7 +401,23 @@ def prepare_markdown(source, root):
     # Support legacy Figure headings and the six scientific Results subsections.
     _, result_chunks = split_sections(by_title["Results"], 3)
     scientific = not any(re.match(r"Figure \d+\.", title) for title, _, _ in result_chunks)
-    if scientific:
+    marker = re.compile(r"^<!-- figure: (\d+) -->\n?", re.MULTILINE)
+    marked = scientific and any(marker.search(chunk) for _, chunk, _ in result_chunks)
+    if marked:
+        # Explicit placement: a line "<!-- figure: N -->" inside a Results subsection
+        # puts Figure N after that subsection; subsections without it get no figure.
+        result_blocks = []
+        for _, chunk, body in result_chunks:
+            if not body.strip():
+                raise ValueError("Empty Results subsection")
+            keys = marker.findall(chunk)
+            if len(keys) > 1:
+                raise ValueError("At most one figure marker per Results subsection")
+            result_blocks.append((keys[0] if keys else None, marker.sub("", chunk)))
+        placed = sorted(key for key, _ in result_blocks if key is not None)
+        if placed != sorted(MAIN):
+            raise ValueError("Figure markers must place each main figure exactly once")
+    elif scientific:
         if len(result_chunks) != 6 or any(not body.strip() for _, _, body in result_chunks):
             raise ValueError("Scientific Results require six nonempty subsections")
         if len({title for title, _, _ in result_chunks}) != 6:
@@ -269,7 +447,8 @@ def prepare_markdown(source, root):
                 output.append(figure_block(key, supplements[key][0], supplements[key][2], start_page=key != "S1"))
         else:
             output.append(chunk)
-    return "".join(output) + supplementary_tables_markdown(root)
+    tables = supplementary_tables_plain if PLAIN_TABLES else supplementary_tables_markdown
+    return "".join(output) + tables(root)
 
 
 def find_program(name):
@@ -288,10 +467,33 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path,
                         default=Path("manuscript/flyvis_midd_manuscript.pdf"))
+    parser.add_argument("--source", type=Path, default=Path("manuscript/manuscript.md"),
+                        help="Manuscript Markdown, relative to the repository root")
+    parser.add_argument("--figure-suffix", default="",
+                        help="Use figNN_main<suffix>.pdf where it exists (e.g. _V2)")
+    parser.add_argument("--figure-order", default="",
+                        help="Comma-separated original figure numbers in manuscript order, "
+                             "e.g. 1,5,2,3,4,6 makes manuscript Figure 2 use the fig05 file")
+    parser.add_argument("--plain-tables", action="store_true",
+                        help="Write the supplementary tables with reader-facing headings")
     parser.add_argument("--prepare-only", action="store_true",
                         help="Generate intermediate Markdown without PDF dependencies")
     args = parser.parse_args(argv)
-    source = ROOT / "manuscript/manuscript.md"
+    global PLAIN_TABLES
+    PLAIN_TABLES = args.plain_tables
+    source = args.source if args.source.is_absolute() else ROOT / args.source
+    if args.figure_suffix:
+        for key, path in list(FIGURES.items()):
+            revised = path.with_name(path.stem + args.figure_suffix + path.suffix)
+            if (ROOT / revised).is_file():
+                FIGURES[key] = revised
+    if args.figure_order:
+        order = [item.strip() for item in args.figure_order.split(",")]
+        if sorted(order) != sorted(MAIN):
+            raise SystemExit("--figure-order must list each main figure once")
+        paths = [FIGURES[item] for item in order]
+        for key, path in zip(MAIN, paths):
+            FIGURES[key] = path
     build = ROOT / "manuscript/_build"
     output = args.output if args.output.is_absolute() else ROOT / args.output
     output = output.resolve()

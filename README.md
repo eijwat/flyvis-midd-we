@@ -1,6 +1,8 @@
 # MIDD × FlyVis
 
-[Manuscript (PDF) ](manuscript/flyvis_midd_manuscript.pdf)
+[Revised manuscript, V6 (PDF)](manuscript/flyvis_midd_manuscript_V6.pdf) — revision made in this fork (2026-11-17): rewritten text, redrawn main and supplementary figures (`figures/**/*_main_V2.*`), plain-language supplementary tables. Source: `manuscript/manuscript_V6.md`. The author list is not yet filled in. See [Revision in this fork](#revision-in-this-fork).
+
+[Original manuscript (PDF) ](manuscript/flyvis_midd_manuscript.pdf)
 
 [Graphical Abstract ](manuscript/graphical.png)
 
@@ -55,6 +57,23 @@ Run the desired notebook from the repository root. Supplementary notebooks for S
 - `src/flyvis_midd/` — shared analysis and plotting code
 - `figures/` — generated figures and numerical summaries
 - `manuscript/` — manuscript, references, and PDF
+
+## Revision in this fork
+
+This fork (eijwat/flyvis-midd-we) revises the manuscript and figures of the original repository (poxsalop5029/flyvis-midd). The original files are kept unchanged; revised files have a version suffix.
+
+- `manuscript/manuscript_V2.md` … `manuscript_V6.md` — successive revisions (latest: V6); `manuscript/manuscript.md` is the original
+- `src/flyvis_midd/figure_rendering_v2.py`, `scripts/render_figures_v2.py` — redraw all 6 main and 10 supplementary figures from the stored tables (no FlyVis inference needed); output `figures/figNN/figNN_main_V2.*`
+- `scripts/generate_fig1_flow_fields.py` — recomputes the decoded flow fields for the static MIDD stimuli (official 50 models, FlyVis 1.2.0, CPU) and stores them in `data/precomputed/fig01/fig1_flow_fields.npz`; the recomputed tangential flow matches the stored table to within 3e-7
+- `scripts/draw_fig1_flow.py` — draft flow-field drawings used to check directions
+- Figure numbers in the revised manuscript follow the order of the text: Fig. 1 ← `fig01`, Fig. 2 ← `fig05`, Fig. 3 ← `fig02`, Fig. 4 ← `fig03`, Fig. 5 ← `fig04`, Fig. 6 ← `fig06`
+
+Build the revised PDF:
+
+```bash
+python3 scripts/build_manuscript_pdf.py --source manuscript/manuscript_V6.md --figure-suffix _V2 \
+    --figure-order 1,5,2,3,4,6 --plain-tables --output manuscript/flyvis_midd_manuscript_V6.pdf
+```
 
 ## Documentation
 

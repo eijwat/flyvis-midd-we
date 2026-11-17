@@ -1,0 +1,24 @@
+{
+  "flyvis_version": "1.2.0",
+  "torch_version": "2.15.0+cu132",
+  "n_models": 50,
+  "conditions": [
+    "3MIDD_048__original",
+    "3MIDD_048__mirror",
+    "3MIDD_048__negative",
+    "3MIDD_207__original",
+    "3MIDD_207__mirror",
+    "3MIDD_207__negative",
+    "4MIDD_085_170__original",
+    "4MIDD_085_170__mirror",
+    "4MIDD_085_170__negative"
+  ],
+  "frames_mean": [
+    10,
+    50
+  ],
+  "frame_snapshot": 25,
+  "compared_rows": 350,
+  "max_abs_T_difference_vs_stored": 2.9556955925130746e-07,
+  "max_abs_stored_T": 0.07735997897004218
+}
