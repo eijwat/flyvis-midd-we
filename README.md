@@ -1,16 +1,78 @@
 # MIDD × FlyVis
 
-[Revised manuscript, V6 (PDF)](manuscript/flyvis_midd_manuscript_V6.pdf) — revision made in this fork (2026-11-17): rewritten text, redrawn main and supplementary figures (`figures/**/*_main_V2.*`), plain-language supplementary tables. Source: `manuscript/manuscript_V6.md`. The author list is not yet filled in. See [Revision in this fork](#revision-in-this-fork).
+**Illusory-motion signals emerge in a connectome-constrained model of the fly visual system trained on optic flow**
 
-[Original manuscript (PDF) ](manuscript/flyvis_midd_manuscript.pdf)
+[Manuscript (PDF)](manuscript/flyvis_midd_manuscript_V6.pdf) · [Manuscript source](manuscript/manuscript_V6.md)
 
-[Graphical Abstract ](manuscript/graphical.png)
+This repository contains the manuscript, stimuli, analysis code, processed results, and figures of a study of how FlyVis networks, trained only to estimate optic flow, respond to static motion illusion-like discrete design (MIDD) patterns.
 
-This repository accompanies a study of decoded motion responses to physically static motion illusion-like discrete disk (MIDD) patterns in FlyVis networks trained for optical-flow estimation. It contains the manuscript, stimuli, analysis code, processed results, and figure notebooks.
+![Fig. 1: static MIDD patterns and the decoded flow](figures/fig01/fig01_main_V2.png)
 
-本研究では、静止MIDD刺激に対するFlyVisネットワークのdecoded flowを調べます。日本語での概要は以下のとおりです。
+## Abstract
 
-本研究では、静止MIDD刺激から生じるdecoded motionを、Original/Mirror反対称成分 \(A\) と共有成分 \(S\) に分解し、実際の方向反転が \(|A|>|S|\) で決まることを示します。さらに、局所3MIDD応答から4MIDDの大域成分を予測できること、非線形motion-detector arrayが静止方向残差を生成しうること、そしてこの応答がMIDDを学習目標に含まないoptic-flow学習中に形成され、trained network–decoder pairingに依存することを示します。decoded flowはモデル出力であり、人間やハエの知覚を直接測定したものではありません。
+Stationary patterns with repeating asymmetric luminance steps appear to move, and both humans and flies respond to them. We asked whether such responses arise in FlyVis, a recurrent network whose wiring follows the fly visual connectome and which is trained only to estimate optic flow from naturalistic video. We presented static motion illusion-like discrete design (MIDD) disks, previously used in human psychophysics, and read out the decoded flow. At initialization the direction-dependent rotational component was absent ($|A|<3\times10^{-9}$); it appeared during ordinary optic-flow training, although no MIDD was in the training set. Its direction depended on the luminance of the intermediate sector: negative for a dark gray (43 of 50 pretrained networks) and positive for a light gray (40 of 50), and the same signs appeared in 14 networks trained from scratch (12/14 and 13/14). As in human observers, the response to four-level patterns followed from the difference between responses to their three-level components (mean held-out $R^2=0.90$), and this rule held within each network even though the component responses differed between networks. The response was about three orders of magnitude smaller than that to physical rotation, varied with stimulus phase, was not restricted to MIDD patterns, and depended on the learned pairing of network and decoder. A circuit model built from the fly connectome and a generic motion task thus acquires a structured response to static patterns that shares the luminance-dependent reversal and the summation rule described for human illusory motion.
+
+## Main findings
+
+- **The response is learned.** At initialization the direction-dependent rotational component $A$ of the decoded flow is absent ($|A|<3\times10^{-9}$). It appears during ordinary optic-flow training, although no MIDD is in the training set.
+- **Luminance sets the direction.** For three-level patterns, $A$ is negative when the intermediate sector is dark gray (43 of 50 pretrained networks) and positive when it is light gray (40 of 50). Networks trained from scratch show the same signs (12/14 and 13/14).
+- **A summation rule links three-level and four-level patterns.** The response to a four-level pattern follows from the difference between the responses to its two three-level components, $A_4 \approx \alpha\,[A_3(C_1)-A_3(C_2)]+\beta$ (mean $R^2=0.93$, held-out $R^2=0.90$), as described for human observers by Kobayashi & Watanabe (2023).
+- **The rule is shared; the amounts are individual.** Networks with identical wiring differ in the sign and size of their responses and keep their relative ordering across stimulus phases (ICC 0.76). Each network's own three-level responses predict its four-level responses.
+- **The response belongs to the motion pathway and its readout.** It changes when T4/T5 activity is replaced and when networks and decoders are exchanged, and it is also evoked by other static patterns. It is about three orders of magnitude smaller than the response to physical rotation.
+
+Decoded flow is the output of the model, which we compare with human psychophysics; it is not itself a measurement of perception.
+
+## Figures
+
+| Figure | Topic | Image | Notebook of the original version |
+|---|---|---|---|
+| Fig. 1 | Static MIDD patterns and the decoded flow | [PNG](figures/fig01/fig01_main_V2.png) | [fig_1](notebooks/fig01/fig_1.ipynb) |
+| Fig. 2 | The response emerges during optic-flow training | [PNG](figures/fig05/fig05_main_V2.png) | [fig_5](notebooks/fig05/fig_5.ipynb) |
+| Fig. 3 | The intermediate luminance sets the direction | [PNG](figures/fig02/fig02_main_V2.png) | [fig_2](notebooks/fig02/fig_2.ipynb) |
+| Fig. 4 | Summation rule from three-level to four-level patterns | [PNG](figures/fig03/fig03_main_V2.png) | [fig_3](notebooks/fig03/fig_3.ipynb) |
+| Fig. 5 | Variation with stimulus phase, sampling, and network | [PNG](figures/fig04/fig04_main_V2.png) | [fig_4](notebooks/fig04/fig_4.ipynb) |
+| Fig. 6 | Motion pathway and readout | [PNG](figures/fig06/fig06_main_V2.png) | [fig_6](notebooks/fig06/fig_6.ipynb) |
+
+Figure numbers follow the order of the manuscript; folder and file names keep the numbering of the original repository. Supplementary Figs. S1–S10 are in `figures/supplementary/figSN/figSN_main_V2.*`.
+
+## Reproduce the figures
+
+All figures are drawn from the bundled processed results; no pretrained networks or FlyVis inference are needed. Use Python 3.9 or newer:
+
+```bash
+git clone https://github.com/eijwat/flyvis-midd-we.git
+cd flyvis-midd-we
+python -m pip install -e ".[all]" scipy pillow jupyterlab
+python scripts/render_figures_v2.py          # all 6 main and 10 supplementary figures
+python scripts/render_figures_v2.py 1 S3     # selected figures
+```
+
+Build the manuscript PDF (requires pandoc and XeLaTeX):
+
+```bash
+python3 scripts/build_manuscript_pdf.py --source manuscript/manuscript_V6.md --figure-suffix _V2 \
+    --figure-order 1,5,2,3,4,6 --plain-tables --output manuscript/flyvis_midd_manuscript_V6.pdf
+```
+
+The decoded flow fields shown in Fig. 1 are stored in `data/precomputed/fig01/fig1_flow_fields.npz`. To recompute them from the 50 pretrained networks (FlyVis 1.2.0; a CPU is sufficient), run `scripts/generate_fig1_flow_fields.py`; the recomputed tangential flow matches the stored table to within $3\times10^{-7}$.
+
+The notebooks in `notebooks/` replay the same processed results and draw the figures of the original version. See the [reproduction map](docs/reproduction_map.md) for inputs, outputs, and verification details.
+
+## Repository structure
+
+- `data/` — stimuli and processed analysis inputs
+- `notebooks/` — main and supplementary figure notebooks (original version)
+- `src/flyvis_midd/` — shared analysis and plotting code (`figure_rendering_v2.py` draws the current figures)
+- `scripts/` — figure rendering, flow-field computation, and the PDF build
+- `figures/` — generated figures and numerical summaries
+- `manuscript/` — manuscript, references, and PDF
+
+## Relation to the original repository
+
+This repository is a fork of [poxsalop5029/flyvis-midd](https://github.com/poxsalop5029/flyvis-midd). The analyses, processed data, and numerical results are those of the original repository. The fork rewrites the manuscript (`manuscript_V2.md` … `manuscript_V6.md`; latest V6) and redraws the figures (`*_main_V2.*`). The original files are kept unchanged:
+
+- [Original manuscript (PDF)](manuscript/flyvis_midd_manuscript.pdf), source `manuscript/manuscript.md`
+- Original figures `figures/figNN/figNN_main.*`
 
 ### Research agents
 
@@ -18,71 +80,14 @@ This repository accompanies a study of decoded motion responses to physically st
 - Google Gemini
 - Anthropic Claude
 
-## Main findings
-
-- Static MIDD patterns evoke directional decoded flow in optic-flow-trained FlyVis networks (a model output, not perception).
-- Under a centered eight-field rendering, the four-level antisymmetric scalar follows an affine prediction from three-level components: \(A_4 \approx \alpha\,[A_3(C_1)-A_3(C_2)]+\beta\) (scalar only, not vector-field additivity).
-- Matched shuffles and other static controls give comparable or larger outputs, so the response is not MIDD-specific. A classical nonlinear Reichardt array partially reproduces its directional structure (a candidate account, not an identified mechanism).
-- The antisymmetric component emerges during ordinary optic-flow learning, although MIDD is not a training target.
-- Output varies across models, phase, and rendering, and depends on network–decoder pairing, consistent with distributed, task-general computation and co-adaptation rather than a dedicated MIDD circuit.
-
-## Reproduce the figures
-
-The canonical notebooks replay bundled processed inputs; they do not download pretrained networks or run FlyVis inference. Use Python 3.9 or newer:
-
-```bash
-git clone --branch main https://github.com/poxsalop5029/flyvis-midd.git
-cd flyvis-midd
-python -m pip install -e ".[all]" scipy pillow jupyterlab
-python -m jupyter lab
-```
-
-Run the desired notebook from the repository root. Supplementary notebooks for S1–S10 are in [`notebooks/supplementary/`](notebooks/supplementary/). See the [reproduction guide](docs/reproduction_map.md) for inputs, outputs, and verification details.
-
-## Main figures
-
-| Figure | Topic | Notebook |
-|---|---|---|
-| Fig. 1 | Static MIDD and decoded flow | [Open](notebooks/fig01/fig_1.ipynb) |
-| Fig. 2 | Luminance dependence and controls | [Open](notebooks/fig02/fig_2.ipynb) |
-| Fig. 3 | Local-to-global scalar prediction | [Open](notebooks/fig03/fig_3.ipynb) |
-| Fig. 4 | Phase, geometry, and shared components | [Open](notebooks/fig04/fig_4.ipynb) |
-| Fig. 5 | Learning dynamics and task performance | [Open](notebooks/fig05/fig_5.ipynb) |
-| Fig. 6 | Population interventions and readout | [Open](notebooks/fig06/fig_6.ipynb) |
-
-## Repository structure
-
-- `data/` — stimuli and processed analysis inputs
-- `notebooks/` — main and supplementary figure notebooks
-- `src/flyvis_midd/` — shared analysis and plotting code
-- `figures/` — generated figures and numerical summaries
-- `manuscript/` — manuscript, references, and PDF
-
-## Revision in this fork
-
-This fork (eijwat/flyvis-midd-we) revises the manuscript and figures of the original repository (poxsalop5029/flyvis-midd). The original files are kept unchanged; revised files have a version suffix.
-
-- `manuscript/manuscript_V2.md` … `manuscript_V6.md` — successive revisions (latest: V6); `manuscript/manuscript.md` is the original
-- `src/flyvis_midd/figure_rendering_v2.py`, `scripts/render_figures_v2.py` — redraw all 6 main and 10 supplementary figures from the stored tables (no FlyVis inference needed); output `figures/figNN/figNN_main_V2.*`
-- `scripts/generate_fig1_flow_fields.py` — recomputes the decoded flow fields for the static MIDD stimuli (official 50 models, FlyVis 1.2.0, CPU) and stores them in `data/precomputed/fig01/fig1_flow_fields.npz`; the recomputed tangential flow matches the stored table to within 3e-7
-- `scripts/draw_fig1_flow.py` — draft flow-field drawings used to check directions
-- Figure numbers in the revised manuscript follow the order of the text: Fig. 1 ← `fig01`, Fig. 2 ← `fig05`, Fig. 3 ← `fig02`, Fig. 4 ← `fig03`, Fig. 5 ← `fig04`, Fig. 6 ← `fig06`
-
-Build the revised PDF:
-
-```bash
-python3 scripts/build_manuscript_pdf.py --source manuscript/manuscript_V6.md --figure-suffix _V2 \
-    --figure-order 1,5,2,3,4,6 --plain-tables --output manuscript/flyvis_midd_manuscript_V6.pdf
-```
-
 ## Documentation
 
 - [Reproduction map](docs/reproduction_map.md)
 - [Processed-data provenance](data/precomputed/PROVENANCE.md)
 
-## Repository maintainance
+## Repository maintenance
 
- `poxsalop5029`.
+Original repository: `poxsalop5029`. This fork: `eijwat`.
 
 ## License
 
