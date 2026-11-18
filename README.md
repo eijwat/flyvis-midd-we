@@ -2,7 +2,7 @@
 
 **Illusory-motion signals emerge in a connectome-constrained model of the fly visual system trained on optic flow**
 
-[Manuscript (PDF)](manuscript/flyvis_midd_manuscript_V6.pdf) · [Manuscript source](manuscript/manuscript_V6.md)
+[Manuscript (PDF)](manuscript/flyvis_midd_manuscript_V7.pdf) · [Manuscript source](manuscript/manuscript_V7.md)
 
 This repository contains the manuscript, stimuli, analysis code, processed results, and figures of a study of how FlyVis networks, trained only to estimate optic flow, respond to static motion illusion-like discrete design (MIDD) patterns.
 
@@ -50,8 +50,8 @@ python scripts/render_figures_v2.py 1 S3     # selected figures
 Build the manuscript PDF (requires pandoc and XeLaTeX):
 
 ```bash
-python3 scripts/build_manuscript_pdf.py --source manuscript/manuscript_V6.md --figure-suffix _V2 \
-    --figure-order 1,5,2,3,4,6 --plain-tables --output manuscript/flyvis_midd_manuscript_V6.pdf
+python3 scripts/build_manuscript_pdf.py --source manuscript/manuscript_V7.md --figure-suffix _V2 \
+    --figure-order 1,5,2,3,4,6 --plain-tables --output manuscript/flyvis_midd_manuscript_V7.pdf
 ```
 
 The decoded flow fields shown in Fig. 1 are stored in `data/precomputed/fig01/fig1_flow_fields.npz`. To recompute them from the 50 pretrained networks (FlyVis 1.2.0; a CPU is sufficient), run `scripts/generate_fig1_flow_fields.py`; the recomputed tangential flow matches the stored table to within $3\times10^{-7}$.
@@ -69,7 +69,7 @@ The notebooks in `notebooks/` replay the same processed results and draw the fig
 
 ## Relation to the original repository
 
-This repository is a fork of [poxsalop5029/flyvis-midd](https://github.com/poxsalop5029/flyvis-midd). The analyses, processed data, and numerical results are those of the original repository. The fork rewrites the manuscript (`manuscript_V2.md` … `manuscript_V6.md`; latest V6) and redraws the figures (`*_main_V2.*`). The original files are kept unchanged:
+This repository is a fork of [poxsalop5029/flyvis-midd](https://github.com/poxsalop5029/flyvis-midd). The analyses, processed data, and numerical results are those of the original repository. The fork rewrites the manuscript (`manuscript_V2.md` … `manuscript_V7.md`; latest V7) and redraws the figures (`*_main_V2.*`). The original files are kept unchanged:
 
 - [Original manuscript (PDF)](manuscript/flyvis_midd_manuscript.pdf), source `manuscript/manuscript.md`
 - Original figures `figures/figNN/figNN_main.*`

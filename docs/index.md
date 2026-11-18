@@ -21,7 +21,7 @@ Decoded flow is the output of the model, which we compare with human psychophysi
 
 ## Manuscript
 
-[Read the manuscript (PDF)](https://github.com/eijwat/flyvis-midd-we/blob/main/manuscript/flyvis_midd_manuscript_V6.pdf) · [Repository](https://github.com/eijwat/flyvis-midd-we)
+[Read the manuscript (PDF)](https://github.com/eijwat/flyvis-midd-we/blob/main/manuscript/flyvis_midd_manuscript_V7.pdf) · [Repository](https://github.com/eijwat/flyvis-midd-we)
 
 ## Reproduce
 
