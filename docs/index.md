@@ -21,7 +21,7 @@ Decoded flow is the output of the model, which we compare with human psychophysi
 
 ## Manuscript
 
-[Read the manuscript (PDF)](https://github.com/eijwat/flyvis-midd-we/blob/main/manuscript/flyvis_midd_manuscript_V7.pdf) · [Repository](https://github.com/eijwat/flyvis-midd-we)
+[Read the manuscript (PDF)](https://github.com/eijwat/flyvis-midd-we/blob/main/manuscript/flyvis_midd_manuscript_V8.pdf) · [Repository](https://github.com/eijwat/flyvis-midd-we)
 
 ## Reproduce
 
@@ -38,4 +38,4 @@ All figures are drawn from bundled processed results without running FlyVis infe
 
 ## Code and data
 
-The [GitHub repository](https://github.com/eijwat/flyvis-midd-we) contains the analysis code, stimuli, processed results, and figures. It is a fork of [poxsalop5029/flyvis-midd](https://github.com/poxsalop5029/flyvis-midd). For processed-data sources, see [`data/precomputed/PROVENANCE.md`](https://github.com/eijwat/flyvis-midd-we/blob/main/data/precomputed/PROVENANCE.md).
+The [GitHub repository](https://github.com/eijwat/flyvis-midd-we) contains the analysis code, stimuli, processed results, and figures. It is the public fork of the project's master repository, which is kept private. For processed-data sources, see [`data/precomputed/PROVENANCE.md`](https://github.com/eijwat/flyvis-midd-we/blob/main/data/precomputed/PROVENANCE.md).
